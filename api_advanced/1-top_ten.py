@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Queries the Reddit API and prints the titles of the first 10 hot posts for a given subreddit."""
 import requests
 
 
@@ -22,8 +23,7 @@ def top_ten(subreddit):
 
         for post in posts:
             title = post.get('data', {}).get('title')
-            if title:
-                print(title)
+            print(title)
         
     except Exception:
         print("None")
