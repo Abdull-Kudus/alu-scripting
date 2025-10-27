@@ -1,39 +1,26 @@
 #!/usr/bin/python3
-"""Return a list containing the titles
- of all hot articles for a given subreddit"""
-
+"""docs"""
 import requests
 
-headers = {'User-Agent': 'MyAPI/0.0.1'}
 
+def recurse(subreddit, hot_list=[], after=None):
+    """"Doc"""
+    url = "https://www.reddit.com/r/{}/hot.json" \
+        .format(subreddit)
+    header = {'User-Agent': 'Mozilla/5.0'}
+    param = {'after': after}
+    resopnse = requests.get(url, headers=header, params=param)
 
-def recurse(subreddit, after="", hot_list=[], page_counter=0):
-
-    subreddit_url = "https://reddit.com/r/{}/hot.json".format(subreddit)
-
-    parameters = {'limit': 100, 'after': after}
-    response = requests.get(subreddit_url, headers=headers, params=parameters)
-
-    if response.status_code == 200:
-        json_data = response.json()
-
-        for child in json_data.get('data').get('children'):
-            title = child.get('data').get('title')
-            hot_list.append(title)
-
-        after = json_data.get('data').get('after')
-        if after is not None:
-
-            page_counter += 1
-            # print(len(hot_list))
-            return recurse(subreddit, after=after,
-                           hot_list=hot_list, page_counter=page_counter)
-        else:
-            return hot_list
-
-    else:
+    if resopnse.status_code != 200:
         return None
+    else:
+        json_res = resopnse.json()
+        after = json_res.get('data').get('after')
+        has_next = \
+            json_res.get('data').get('after') is not None
+        hot_articles = json_res.get('data').get('children')
+        [hot_list.append(article.get('data').get('title'))
+         for article in hot_articles]
 
-
-if __name__ == '__main__':
-    print(recurse("zerowastecz"))
+        return recurse(subreddit, hot_list, after=after) \
+            if has_next else hot_list
